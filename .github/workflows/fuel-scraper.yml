@@ -2,23 +2,24 @@ name: Daily Fuel Price Scraper
 
 on:
   schedule:
-    - cron: '5 0 * * *' # Her gece 00:05 UTC'de otomatik çalışır
-  workflow_dispatch:     # Manuel çalıştırma butonu ekler
+    # Türkiye Saati (UTC+3) ile gece 00:05 = UTC Saatiyle 21:05
+    - cron: '5 21 * * *'
+  workflow_dispatch: # GitHub üzerinden butonla manuel tetiklemek için
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
       - name: Code Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Install Dependencies
-        run: npm install firebase-admin axios
+        run: npm ci
 
       - name: Run Scraper
         env:
