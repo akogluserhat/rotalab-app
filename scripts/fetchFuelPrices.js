@@ -1,15 +1,16 @@
 // scripts/fetchFuelPrices.js
-const admin = require('firebase-admin');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getDatabase } = require('firebase-admin/database');
 
 // Firebase Admin ilklendirmesi
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+initializeApp({
+  credential: cert(serviceAccount),
   databaseURL: "https://rotalab-app-default-rtdb.europe-west1.firebasedatabase.app"
 });
 
-const db = admin.database();
+const db = getDatabase();
 
 /**
  * Canlı Web Scraping Fonksiyonu (Döviz.com Akaryakıt Sayfası)
@@ -31,8 +32,7 @@ async function scrapeLiveFuelPrices() {
 
     const htmlText = await response.text();
 
-    // HTML içinden İstanbul (34) fiyatlarını regex ile ayıkla
-    // Benzin, Motorin ve LPG fiyat örüntülerini arıyoruz
+    // HTML içinden fiyatları regex ile ayıkla
     const benzinMatch = htmlText.match(/Benzin[\s\S]*?(\d{2}[.,]\d{2})/i);
     const motorinMatch = htmlText.match(/Motorin[\s\S]*?(\d{2}[.,]\d{2})/i);
     const lpgMatch = htmlText.match(/LPG|Otogaz[\s\S]*?(\d{2}[.,]\d{2})/i);
@@ -58,11 +58,10 @@ async function scrapeLiveFuelPrices() {
     // Gerçek veriyi Firebase Realtime Database'e yaz
     await db.ref('/fuel_prices').set(fuelData);
     console.log("✅ %100 Gerçek Canlı Veriler Firebase'e Başarıyla Yazıldı!");
-    
+
     process.exit(0);
   } catch (error) {
     console.error("❌ Scraping Hatası:", error.message);
-    // Asla sahte veri yazmıyoruz! Hata durumunda bot kırmızıyı yakar.
     process.exit(1);
   }
 }
