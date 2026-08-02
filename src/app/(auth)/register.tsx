@@ -1,0 +1,137 @@
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { Link, router } from 'expo-router';
+import { Theme } from '@/constants/Theme';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { Logo } from '@/components/Logo';
+
+export default function RegisterScreen() {
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleRegister = () => {
+    // Şimdilik sadece navigasyon yapıyor
+    router.replace('/(tabs)');
+  };
+
+  return (
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Logo />
+          <Text style={styles.title}>Hesap Oluştur</Text>
+          <Text style={styles.subtitle}>Aramıza katılmak için bilgilerinizi girin.</Text>
+        </View>
+
+        <View style={styles.form}>
+          <Input
+            label="Ad Soyad"
+            placeholder="Adınız Soyadınız"
+            autoCapitalize="words"
+            value={fullName}
+            onChangeText={setFullName}
+          />
+          
+          <Input
+            label="E-posta Adresi"
+            placeholder="ornek@eposta.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+          />
+          
+          <Input
+            label="Şifre"
+            placeholder="••••••••"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+          
+          <Input
+            label="Şifre Tekrar"
+            placeholder="••••••••"
+            secureTextEntry
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+
+          <Button 
+            title="Kayıt Ol" 
+            onPress={handleRegister} 
+            style={styles.registerButton} 
+          />
+        </View>
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Zaten hesabın var mı? </Text>
+          <Link href="/(auth)/login" asChild>
+            <Text style={styles.footerLink}>Giriş Yap</Text>
+          </Link>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Theme.colors.background,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    padding: 24,
+    justifyContent: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 32,
+    marginTop: 20,
+  },
+  title: {
+    fontFamily: Theme.fonts.bold,
+    fontSize: 28,
+    color: Theme.colors.text,
+    marginTop: 24,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontFamily: Theme.fonts.regular,
+    fontSize: 16,
+    color: Theme.colors.textSecondary,
+    textAlign: 'center',
+  },
+  form: {
+    width: '100%',
+  },
+  registerButton: {
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 'auto',
+    paddingTop: 16,
+    paddingBottom: 20,
+  },
+  footerText: {
+    fontFamily: Theme.fonts.regular,
+    fontSize: 15,
+    color: Theme.colors.textSecondary,
+  },
+  footerLink: {
+    fontFamily: Theme.fonts.bold,
+    fontSize: 15,
+    color: Theme.colors.primary,
+  },
+});

@@ -1,0 +1,26 @@
+name: Daily Fuel Price Scraper
+
+on:
+  schedule:
+    - cron: '5 0 * * *' # Her gece 00:05 UTC'de otomatik çalışır
+  workflow_dispatch:     # Manuel çalıştırma butonu ekler
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm install firebase-admin axios
+
+      - name: Run Scraper
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node scripts/fetchFuelPrices.js
