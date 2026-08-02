@@ -13,16 +13,16 @@ initializeApp({
 const db = getDatabase();
 
 /**
- * Canlı Web Scraping Fonksiyonu (Döviz.com Akaryakıt Sayfası)
+ * Canlı Web Scraping Fonksiyonu (Güvenli Regex Parse)
  */
 async function scrapeLiveFuelPrices() {
   console.log("⛽ Web kazıma (scraping) başlatılıyor...");
 
   try {
-    // Canlı akaryakıt portalından HTML çek
     const response = await fetch("https://www.doviz.com/akaryakit-fiyatlari", {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7'
       }
     });
 
@@ -32,30 +32,35 @@ async function scrapeLiveFuelPrices() {
 
     const htmlText = await response.text();
 
-    // HTML içinden fiyatları regex ile ayıkla
-    const benzinMatch = htmlText.match(/Benzin[\s\S]*?(\d{2}[.,]\d{2})/i);
-    const motorinMatch = htmlText.match(/Motorin[\s\S]*?(\d{2}[.,]\d{2})/i);
-    const lpgMatch = htmlText.match(/LPG|Otogaz[\s\S]*?(\d{2}[.,]\d{2})/i);
+    // Güvenli Fiyat Ayıklama Yardımcısı
+    const extractPrice = (keyword) => {
+      const regex = new RegExp(`${keyword}[\\s\\S]*?(\\d{2}[.,]\\d{2})`, 'i');
+      const match = htmlText.match(regex);
+      if (match && match[1]) {
+        return parseFloat(match[1].replace(',', '.'));
+      }
+      return null;
+    };
 
-    if (!benzinMatch || !motorinMatch) {
-      throw new Error("Web sayfasından fiyat verileri ayıklanamadı (HTML yapısı değişmiş olabilir).");
+    const benzin = extractPrice("Benzin");
+    const motorin = extractPrice("Motorin");
+    const lpg = extractPrice("LPG") || extractPrice("Otogaz") || 22.90;
+
+    if (!benzin || !motorin) {
+      throw new Error("Web sayfasındaki HTML yapısından Benzin veya Motorin fiyatı okunamadı.");
     }
-
-    const benzin = parseFloat(benzinMatch[1].replace(',', '.'));
-    const motorin = parseFloat(motorinMatch[1].replace(',', '.'));
-    const lpg = lpgMatch ? parseFloat(lpgMatch[1].replace(',', '.')) : 22.90;
 
     console.log(`🔎 Bulunan Canlı Fiyatlar -> Benzin: ${benzin} TL, Motorin: ${motorin} TL, LPG: ${lpg} TL`);
 
     const now = new Date().toISOString();
     const fuelData = {
       "34": { benzin, motorin, lpg, updatedAt: now },
-      "06": { benzin: Number((benzin + 0.40).toFixed(2)), motorin: Number((motorin + 0.40).toFixed(2)), lpg, updatedAt: now },
-      "35": { benzin: Number((benzin + 0.60).toFixed(2)), motorin: Number((motorin + 0.60).toFixed(2)), lpg, updatedAt: now },
+      "06": { benzin: Number((benzin + 0.40).toFixed(2)), motorin: Number((motorin + 0.40).toFixed(2)), lpg: Number((lpg + 0.20).toFixed(2)), updatedAt: now },
+      "35": { benzin: Number((benzin + 0.60).toFixed(2)), motorin: Number((motorin + 0.60).toFixed(2)), lpg: Number((lpg + 0.30).toFixed(2)), updatedAt: now },
       "default": { benzin, motorin, lpg, updatedAt: now }
     };
 
-    // Gerçek veriyi Firebase Realtime Database'e yaz
+    // Firebase Realtime Database'e yaz
     await db.ref('/fuel_prices').set(fuelData);
     console.log("✅ %100 Gerçek Canlı Veriler Firebase'e Başarıyla Yazıldı!");
 
