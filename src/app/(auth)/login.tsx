@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { Link, router } from 'expo-router';
-import { Theme } from '@/constants/Theme';
 import { Logo } from '@/components/Logo';
-import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Theme } from '@/constants/Theme';
+import { Link, router } from 'expo-router';
+import React, { useState } from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -12,7 +12,7 @@ export default function LoginScreen() {
 
   const handleLogin = () => {
     // Şimdilik sadece navigasyon yapıyor
-    router.replace('/(tabs)');
+    router.replace('/');
   };
 
   return (

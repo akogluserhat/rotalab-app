@@ -1,19 +1,19 @@
+import FuelPriceCard from '@/components/FuelPriceCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  DeviceEventEmitter,
-  Dimensions,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    DeviceEventEmitter,
+    Dimensions,
+    Image,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import FuelPriceCard from '../../components/FuelPriceCard';
 
 const { width } = Dimensions.get('window');
 const THEME_KEY = '@rotalab_theme';
@@ -50,7 +50,7 @@ export default function HomeScreen() {
             {/* 🖼️ BİR TIK DAHA BÜYÜTÜLMÜŞ LOGO ALANI */}
             <View style={styles.logoWrapper}>
               <Image
-                source={require('../../../assets/images/logo.png')}
+                source={require('@/assets/images/logo.png')}
                 style={styles.logoImage}
                 resizeMode="contain"
               />
