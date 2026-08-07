@@ -1,19 +1,22 @@
+import { auth } from '@/config/firebase';
+import { clearCloudPath } from '@/services/cloudSync';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack, useFocusEffect } from 'expo-router';
+import { signOut } from 'firebase/auth';
 import React, { useCallback, useState } from 'react';
 import {
-    Alert,
-    DeviceEventEmitter,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  DeviceEventEmitter,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import BottomNavBar from '../components/BottomNavBar';
 
@@ -88,12 +91,36 @@ export default function ProfileScreen() {
           onPress: async () => {
             try {
               await AsyncStorage.multiRemove([VEHICLES_KEY, HISTORY_KEY]);
+              clearCloudPath('vehicles');
+              clearCloudPath('history');
               setVehicleCount(0);
               setHistoryCount(0);
               setDefaultVehicleName('Seçilmedi');
               Alert.alert('Başarılı', 'Tüm yerel veriler temizlendi.');
             } catch (error) {
               Alert.alert('Hata', 'Veriler temizlenirken bir sorun oluştu.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleSignOut = () => {
+    Alert.alert(
+      'Çıkış Yap',
+      'Hesabınızdan çıkış yapmak istediğinize emin misiniz?',
+      [
+        { text: 'Vazgeç', style: 'cancel' },
+        {
+          text: 'Çıkış Yap',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut(auth);
+              // Yönlendirme, kök layout'taki oturum dinleyicisi tarafından otomatik yapılacak.
+            } catch (error) {
+              Alert.alert('Hata', 'Çıkış yapılırken bir sorun oluştu.');
             }
           },
         },
@@ -136,8 +163,12 @@ export default function ProfileScreen() {
           </View>
 
           <View style={styles.profileInfo}>
-            <Text style={[styles.userName, isDarkMode && styles.textWhite]}>RotaLab Sürücüsü</Text>
-            <Text style={[styles.userEmail, isDarkMode && styles.textGray]}>surucu@rotalab.app</Text>
+            <Text style={[styles.userName, isDarkMode && styles.textWhite]}>
+              {auth.currentUser?.displayName || 'RotaLab Sürücüsü'}
+            </Text>
+            <Text style={[styles.userEmail, isDarkMode && styles.textGray]}>
+              {auth.currentUser?.email || ''}
+            </Text>
             <View style={styles.badgeRow}>
               <View style={[styles.proBadge, isDarkMode && styles.proBadgeDark]}>
                 <Ionicons name="shield-checkmark" size={12} color="#b85d00" />
@@ -288,6 +319,15 @@ export default function ProfileScreen() {
         <TouchableOpacity style={styles.dangerButton} onPress={handleClearAllData} activeOpacity={0.8}>
           <Ionicons name="trash-outline" size={18} color="#EF4444" />
           <Text style={styles.dangerButtonText}>Tüm Verileri ve Geçmişi Temizle</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.dangerButton, styles.signOutButton, isDarkMode && styles.signOutButtonDark]}
+          onPress={handleSignOut}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="log-out-outline" size={18} color="#EF4444" />
+          <Text style={styles.dangerButtonText}>Çıkış Yap</Text>
         </TouchableOpacity>
 
         <Text style={[styles.versionText, isDarkMode && styles.textGray]}>
@@ -525,6 +565,13 @@ const styles = StyleSheet.create({
     color: '#EF4444',
     fontSize: 13,
     fontWeight: '800',
+  },
+  signOutButton: {
+    marginTop: -8,
+  },
+  signOutButtonDark: {
+    backgroundColor: '#3F1D1D',
+    borderColor: '#7F1D1D',
   },
   versionText: {
     textAlign: 'center',

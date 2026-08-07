@@ -1,19 +1,20 @@
+import { clearCloudPath, fetchFromCloud, syncToCloud } from '@/services/cloudSync';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack, useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    DeviceEventEmitter,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  DeviceEventEmitter,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import BottomNavBar from '../components/BottomNavBar';
 
@@ -68,9 +69,20 @@ export default function HistoryScreen() {
   const loadHistory = async () => {
     setRefreshing(true);
     try {
+      // Önce buluttan (Firebase) okumayı dene
+      const cloudHistory = await fetchFromCloud<HistoryItem[]>('history');
+      if (cloudHistory && cloudHistory.length > 0) {
+        setHistoryList(cloudHistory);
+        await AsyncStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(cloudHistory));
+        return;
+      }
+
       const stored = await AsyncStorage.getItem(HISTORY_STORAGE_KEY);
       if (stored) {
-        setHistoryList(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        setHistoryList(parsed);
+        // Bulutta hiç kayıt yoksa, mevcut yerel veriyi ilk kez buluta taşı
+        if (cloudHistory === null && parsed.length > 0) syncToCloud('history', parsed);
       } else {
         setHistoryList([]);
       }
@@ -91,6 +103,7 @@ export default function HistoryScreen() {
           const updated = historyList.filter((item) => item.id !== id);
           setHistoryList(updated);
           await AsyncStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
+          syncToCloud('history', updated);
         },
       },
     ]);
@@ -106,6 +119,7 @@ export default function HistoryScreen() {
         onPress: async () => {
           setHistoryList([]);
           await AsyncStorage.removeItem(HISTORY_STORAGE_KEY);
+          clearCloudPath('history');
         },
       },
     ]);

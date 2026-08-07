@@ -1,22 +1,23 @@
+import { fetchFromCloud, syncToCloud } from '@/services/cloudSync';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack, useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-    Alert,
-    DeviceEventEmitter,
-    Keyboard,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  DeviceEventEmitter,
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import BottomNavBar from '../components/BottomNavBar';
 
@@ -83,12 +84,25 @@ export default function VehiclesScreen() {
 
   const loadVehicles = async () => {
     try {
+      // Önce buluttan (Firebase) okumayı dene
+      const cloudVehicles = await fetchFromCloud<Vehicle[]>('vehicles');
+      if (cloudVehicles && cloudVehicles.length > 0) {
+        setVehicles(cloudVehicles);
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cloudVehicles));
+        return;
+      }
+
+      // Buluttan veri gelmediyse (ilk giriş / çevrimdışı) yereldeki veriyi kullan
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       if (stored) {
-        setVehicles(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        setVehicles(parsed);
+        // Bulutta hiç kayıt yoksa, mevcut yerel veriyi ilk kez buluta taşı
+        if (cloudVehicles === null) syncToCloud('vehicles', parsed);
       } else {
         setVehicles(INITIAL_VEHICLES);
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_VEHICLES));
+        if (cloudVehicles === null) syncToCloud('vehicles', INITIAL_VEHICLES);
       }
     } catch (error) {
       console.log('Araçlar yüklenirken hata:', error);
@@ -102,6 +116,7 @@ export default function VehiclesScreen() {
     } catch (error) {
       console.log('Araçlar kaydedilirken hata:', error);
     }
+    syncToCloud('vehicles', updatedVehicles);
   };
 
   const handleSetDefault = (id: string) => {

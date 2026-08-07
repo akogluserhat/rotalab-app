@@ -1,18 +1,50 @@
 import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { auth } from '@/config/firebase';
 import { Theme } from '@/constants/Theme';
-import { Link, router } from 'expo-router';
+import { Link } from 'expo-router';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+function getAuthErrorMessage(code: string): string {
+  switch (code) {
+    case 'auth/invalid-email':
+      return 'Geçersiz e-posta adresi.';
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+      return 'E-posta veya şifre hatalı.';
+    case 'auth/too-many-requests':
+      return 'Çok fazla başarısız deneme yapıldı. Lütfen bir süre sonra tekrar deneyin.';
+    case 'auth/network-request-failed':
+      return 'İnternet bağlantınızı kontrol edin.';
+    default:
+      return 'Giriş yapılamadı. Lütfen tekrar deneyin.';
+  }
+}
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // Şimdilik sadece navigasyon yapıyor
-    router.replace('/');
+  const handleLogin = async () => {
+    if (!email.trim() || !password) {
+      Alert.alert('Eksik Bilgi', 'Lütfen e-posta ve şifrenizi girin.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      // Yönlendirme, kök layout'taki oturum dinleyicisi tarafından otomatik yapılacak.
+    } catch (error: any) {
+      Alert.alert('Giriş Başarısız', getAuthErrorMessage(error?.code));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,6 +67,7 @@ export default function LoginScreen() {
             autoCapitalize="none"
             value={email}
             onChangeText={setEmail}
+            editable={!loading}
           />
           
           <Input
@@ -43,6 +76,7 @@ export default function LoginScreen() {
             secureTextEntry
             value={password}
             onChangeText={setPassword}
+            editable={!loading}
           />
 
           <View style={styles.forgotPasswordContainer}>
@@ -52,6 +86,7 @@ export default function LoginScreen() {
           <Button 
             title="Giriş Yap" 
             onPress={handleLogin} 
+            isLoading={loading}
             style={styles.loginButton} 
           />
         </View>

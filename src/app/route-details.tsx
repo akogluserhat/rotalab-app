@@ -1,3 +1,4 @@
+import { syncToCloud } from '@/services/cloudSync';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
@@ -90,6 +91,7 @@ export default function RouteDetailsScreen() {
 
       const updatedHistory = [newHistoryItem, ...historyList];
       await AsyncStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
+      syncToCloud('history', updatedHistory);
       setSaved(true);
       Alert.alert('Başarılı', 'Rota hesaplamanız Rota Geçmişim sayfasına kaydedildi!');
     } catch (error) {

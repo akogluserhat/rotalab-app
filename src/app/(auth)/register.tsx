@@ -1,20 +1,59 @@
 import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { auth } from '@/config/firebase';
 import { Theme } from '@/constants/Theme';
-import { Link, router } from 'expo-router';
+import { Link } from 'expo-router';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+function getAuthErrorMessage(code: string): string {
+  switch (code) {
+    case 'auth/email-already-in-use':
+      return 'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.';
+    case 'auth/invalid-email':
+      return 'Geçersiz e-posta adresi.';
+    case 'auth/weak-password':
+      return 'Şifre en az 6 karakter olmalıdır.';
+    case 'auth/network-request-failed':
+      return 'İnternet bağlantınızı kontrol edin.';
+    default:
+      return 'Kayıt oluşturulamadı. Lütfen tekrar deneyin.';
+  }
+}
 
 export default function RegisterScreen() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleRegister = () => {
-    // Şimdilik sadece navigasyon yapıyor
-    router.replace('/');
+  const handleRegister = async () => {
+    if (!fullName.trim() || !email.trim() || !password || !confirmPassword) {
+      Alert.alert('Eksik Bilgi', 'Lütfen tüm alanları doldurun.');
+      return;
+    }
+    if (password.length < 6) {
+      Alert.alert('Zayıf Şifre', 'Şifreniz en az 6 karakter olmalıdır.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Şifreler Uyuşmuyor', 'Girdiğiniz şifreler birbiriyle eşleşmiyor.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+      await updateProfile(userCredential.user, { displayName: fullName.trim() });
+      // Yönlendirme, kök layout'taki oturum dinleyicisi tarafından otomatik yapılacak.
+    } catch (error: any) {
+      Alert.alert('Kayıt Başarısız', getAuthErrorMessage(error?.code));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -36,6 +75,7 @@ export default function RegisterScreen() {
             autoCapitalize="words"
             value={fullName}
             onChangeText={setFullName}
+            editable={!loading}
           />
           
           <Input
@@ -45,6 +85,7 @@ export default function RegisterScreen() {
             autoCapitalize="none"
             value={email}
             onChangeText={setEmail}
+            editable={!loading}
           />
           
           <Input
@@ -53,6 +94,7 @@ export default function RegisterScreen() {
             secureTextEntry
             value={password}
             onChangeText={setPassword}
+            editable={!loading}
           />
           
           <Input
@@ -61,11 +103,13 @@ export default function RegisterScreen() {
             secureTextEntry
             value={confirmPassword}
             onChangeText={setConfirmPassword}
+            editable={!loading}
           />
 
           <Button 
             title="Kayıt Ol" 
             onPress={handleRegister} 
+            isLoading={loading}
             style={styles.registerButton} 
           />
         </View>
