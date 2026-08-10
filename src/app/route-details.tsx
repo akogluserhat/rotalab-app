@@ -18,8 +18,8 @@ import {
 import BottomNavBar from '../components/BottomNavBar';
 
 const NAV_BAR_HEIGHT = Platform.OS === 'ios' ? 82 : 65;
-const HISTORY_STORAGE_KEY = '@rotalab_history';
-const THEME_KEY = '@rotalab_theme';
+const HISTORY_STORAGE_KEY = '@rotamap_history';
+const THEME_KEY = ' @rotamap_theme';
 
 export default function RouteDetailsScreen() {
   const params = useLocalSearchParams();

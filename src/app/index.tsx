@@ -3,20 +3,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    DeviceEventEmitter,
-    Dimensions,
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  DeviceEventEmitter,
+  Dimensions,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
-const THEME_KEY = '@rotalab_theme';
+const THEME_KEY = '@rotamap_theme';
 
 export default function HomeScreen() {
   const [isDarkMode, setIsDarkMode] = useState(false);

@@ -20,9 +20,9 @@ import {
 } from 'react-native';
 import BottomNavBar from '../components/BottomNavBar';
 
-const VEHICLES_KEY = '@rotalab_vehicles';
-const HISTORY_KEY = '@rotalab_history';
-const THEME_KEY = '@rotalab_theme';
+const VEHICLES_KEY = '@rotamap_vehicles';
+const HISTORY_KEY = '@rotamap_theme';
+const THEME_KEY = '@rotamap_theme';
 
 export default function ProfileScreen() {
   const [vehicleCount, setVehicleCount] = useState(0);

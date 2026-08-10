@@ -29,8 +29,8 @@ import BottomNavBar from '../components/BottomNavBar';
 
 const { width, height } = Dimensions.get('window');
 
-const STORAGE_KEY = '@rotalab_vehicles';
-const THEME_KEY = '@rotalab_theme';
+const STORAGE_KEY = '@rotamap_vehicles';
+const THEME_KEY = '@rotamap_theme';
 const INPUT_ACCESSORY_ID = 'numericInputDoneBar';
 const NAV_BAR_HEIGHT = Platform.OS === 'ios' ? 82 : 65;
 const SHEET_MAX_HEIGHT = height * 0.62;
@@ -50,7 +50,7 @@ const geocodeAddress = async (query: string): Promise<{ latitude: number; longit
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
         searchQuery
       )}&countrycodes=tr&limit=1`,
-      { headers: { 'User-Agent': 'RotaLabApp/1.0' } }
+      { headers: { 'User-Agent': 'RotaMapApp/1.0' } }
     );
     const data = await response.json();
     if (Array.isArray(data) && data.length > 0) {

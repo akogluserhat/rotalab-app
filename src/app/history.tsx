@@ -18,8 +18,8 @@ import {
 } from 'react-native';
 import BottomNavBar from '../components/BottomNavBar';
 
-const HISTORY_STORAGE_KEY = '@rotalab_history';
-const THEME_KEY = '@rotalab_theme';
+const HISTORY_STORAGE_KEY = '@rotamap_history';
+const THEME_KEY = '@rotamap_theme';
 
 interface HistoryItem {
   id: string;

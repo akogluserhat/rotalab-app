@@ -4,7 +4,7 @@ import { router, usePathname } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { DeviceEventEmitter, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const THEME_KEY = '@rotalab_theme';
+const THEME_KEY = '@rotamap_theme';
 
 interface BottomNavBarProps {
   activeTab?: 'home' | 'history' | 'vehicles' | 'profile';

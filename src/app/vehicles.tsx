@@ -21,8 +21,8 @@ import {
 } from 'react-native';
 import BottomNavBar from '../components/BottomNavBar';
 
-const STORAGE_KEY = '@rotalab_vehicles';
-const THEME_KEY = '@rotalab_theme';
+const STORAGE_KEY = '@rotamap_vehicles';
+const THEME_KEY = '@rotamap_theme';
 
 interface Vehicle {
   id: string;
